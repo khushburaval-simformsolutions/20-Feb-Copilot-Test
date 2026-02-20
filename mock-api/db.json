@@ -1,9 +1,6 @@
 {
   "tasks": [
     {
-      "id": "1"
-    },
-    {
       "title": "Test 1",
       "description": "cerate a FE app for managing task",
       "status": "todo",
@@ -20,6 +17,24 @@
       "dueDate": "2026-02-25",
       "createdAt": "2026-02-20T11:12:14.454Z",
       "id": "5PkuWpE"
+    },
+    {
+      "title": "Test 1",
+      "description": "Cerate a FE app for managing task",
+      "status": "done",
+      "priority": "medium",
+      "dueDate": "2026-02-20",
+      "createdAt": "2026-02-20T11:15:12.796Z",
+      "id": "A4paUTB"
+    },
+    {
+      "title": "Task 3",
+      "description": "Testing todo status and due date ",
+      "status": "in-progress",
+      "priority": "high",
+      "dueDate": "2026-02-21",
+      "createdAt": "2026-02-20T11:22:33.520Z",
+      "id": "Q6Us634"
     }
   ]
 }

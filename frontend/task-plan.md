@@ -16,8 +16,8 @@
 7. ✅ **Display tasks in a user-friendly way**
 
 ### Phase 2: Advanced Features
-8. 🔲 **Implement drag-and-drop task reordering**
-9. 🔲 **Add local storage and offline support**
+8. ✅ **Implement drag-and-drop task reordering**
+9. ✅ **Add local storage and offline support**
 
 ---
 
@@ -528,11 +528,11 @@ Execute tasks in the following sequence:
 - ✅ Proper TypeScript typing throughout
 
 ### Advanced Features Testing
-- 🔲 Drag-and-drop reordering works
-- 🔲 Offline support works
-- 🔲 Sync status indicator displays
-- 🔲 All features work offline
-- 🔲 Smooth offline/online transitions
+- ✅ Drag-and-drop reordering works
+- ✅ Offline support works
+- ✅ Sync status indicator displays
+- ✅ All features work offline
+- ✅ Smooth offline/online transitions
 
 ---
 

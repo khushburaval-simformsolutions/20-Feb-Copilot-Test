@@ -144,6 +144,6 @@ GitHub Copilot was extensively used throughout the entire development process:
 - [x] Code is tested and functional
 - [x] README updated (if needed)
 - [x] This SUBMISSION.md file completed
-- [ ] MS Teams recording completed and shared
-- [ ] GitHub repository URL provided to RM
-- [ ] MS Teams recording link provided to RM
+- [x] MS Teams recording completed and shared
+- [x] GitHub repository URL provided to RM
+- [x] MS Teams recording link provided to RM

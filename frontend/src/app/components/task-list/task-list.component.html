@@ -1,0 +1,98 @@
+<div class="task-list-container">
+  <h1>Task Management</h1>
+
+  <!-- Loading Spinner -->
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <!-- Error Message -->
+  <app-error-message [message]="error"></app-error-message>
+
+  <!-- Create Task Button -->
+  <div class="actions">
+    <button 
+      class="btn btn-primary" 
+      (click)="toggleForm()"
+      *ngIf="!showForm">
+      Create New Task
+    </button>
+  </div>
+
+  <!-- Task Form -->
+  <app-task-form 
+    *ngIf="showForm"
+    [task]="selectedTask"
+    (submitForm)="onCreateTask($event)"
+    (cancel)="toggleForm()">
+  </app-task-form>
+
+  <!-- Sorting Controls -->
+  <div class="sort-controls" *ngIf="tasks.length > 0 && !loading">
+    <label>Sort by:</label>
+    <button 
+      class="btn-sort" 
+      [class.active]="sortBy === 'priority'"
+      (click)="changeSortBy('priority')">
+      Priority {{ sortBy === 'priority' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
+    </button>
+    <button 
+      class="btn-sort" 
+      [class.active]="sortBy === 'dueDate'"
+      (click)="changeSortBy('dueDate')">
+      Due Date {{ sortBy === 'dueDate' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
+    </button>
+  </div>
+
+  <!-- Task List -->
+  <div class="tasks" *ngIf="!loading">
+    <div *ngIf="tasks.length === 0 && !error" class="empty-state">
+      <p>No tasks found. Create your first task!</p>
+    </div>
+
+    <div 
+      cdkDropList 
+      class="task-list"
+      (cdkDropListDropped)="drop($event)">
+      <div 
+        class="task-item" 
+        *ngFor="let task of tasks"
+        [class.task-done]="task.status === TaskStatus.DONE"
+        [class.task-overdue]="isOverdue(task)"
+        cdkDrag>
+        <div class="drag-handle" cdkDragHandle>
+          <span class="drag-icon">⋮⋮</span>
+        </div>
+        <div class="task-content">
+          <div class="task-header">
+            <h3>{{ task.title }}</h3>
+            <div class="badges">
+              <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+                {{ task.priority || 'N/A' }}
+              </span>
+              <span class="status-badge" [ngClass]="'status-' + task.status">
+                {{ task.status }}
+              </span>
+            </div>
+          </div>
+          <p class="task-description">{{ task.description }}</p>
+          <div class="task-meta">
+            <small>Created: {{ task.createdAt | date:'short' }}</small>
+            <small *ngIf="task.dueDate" class="due-date" [class.overdue]="isOverdue(task)">
+              Due: {{ task.dueDate | date:'short' }}
+              <span *ngIf="isOverdue(task)" class="overdue-label"> (Overdue!)</span>
+            </small>
+          </div>
+          <div class="task-actions">
+            <button 
+              class="btn btn-edit" 
+              (click)="onEditTask(task)"
+              [disabled]="!canEditTask(task)"
+              [title]="canEditTask(task) ? 'Edit task' : 'Cannot edit completed tasks'">
+              Edit
+            </button>
+            <button class="btn btn-delete" (click)="onDeleteTask(task.id)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

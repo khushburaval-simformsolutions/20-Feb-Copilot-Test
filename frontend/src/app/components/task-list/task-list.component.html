@@ -74,13 +74,28 @@
             </div>
           </div>
           <p class="task-description">{{ task.description }}</p>
+          
+          <!-- Timer Progress Bar for In-Progress Tasks -->
+          <div class="timer-container" *ngIf="isTaskTimerRunning(task)">
+            <div class="timer-info">
+              <span class="timer-label">⏱️ Time Remaining: {{ formatDuration(getRemainingMinutes(task)) }}</span>
+              <span class="timer-percentage">{{ getTimeProgress(task) }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" [style.width.%]="getTimeProgress(task)"></div>
+            </div>
+            <small class="elapsed-time">
+              Elapsed: {{ formatDuration(getElapsedMinutes(task)) }} / {{ formatDuration(task.duration!) }}
+            </small>
+          </div>
+          
           <div class="task-meta">
             <small>Created: {{ task.createdAt | date:'short' }}</small>
             <small *ngIf="task.dueDate" class="due-date" [class.overdue]="isOverdue(task)">
               Due: {{ task.dueDate | date:'short' }}
               <span *ngIf="isOverdue(task)" class="overdue-label"> (Overdue!)</span>
             </small>
-            <small *ngIf="task.duration" class="duration">
+            <small *ngIf="task.duration && !isTaskTimerRunning(task)" class="duration">
               ⏱️ {{ formatDuration(task.duration) }}
             </small>
           </div>

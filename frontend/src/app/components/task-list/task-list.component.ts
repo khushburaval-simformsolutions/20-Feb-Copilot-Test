@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, interval } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TaskService } from '../../core/services/task.service';
 import { Task, CreateTaskDto } from '../../core/interfaces/task.interface';
@@ -19,6 +19,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
   selectedTask?: Task;
   sortBy: 'priority' | 'dueDate' = 'priority';
   sortOrder: 'asc' | 'desc' = 'asc';
+  currentTime = new Date().getTime(); // For timer calculations
 
   TaskStatus = TaskStatus; // Expose enum for template
 
@@ -29,6 +30,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadTasks();
     this.subscribeToLoadingState();
+    this.startTimer();
   }
 
   ngOnDestroy(): void {
@@ -182,5 +184,58 @@ export class TaskListComponent implements OnInit, OnDestroy {
     } else {
       return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''}`;
     }
+  }
+
+  /**
+   * Start a timer that updates current time every second
+   */
+  private startTimer(): void {
+    interval(1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.currentTime = new Date().getTime();
+      });
+  }
+
+  /**
+   * Calculate elapsed time in minutes for a task
+   */
+  getElapsedMinutes(task: Task): number {
+    if (!task.startedAt || task.status !== TaskStatus.IN_PROGRESS) {
+      return 0;
+    }
+    const startedAtTime = new Date(task.startedAt).getTime();
+    return Math.floor((this.currentTime - startedAtTime) / (1000 * 60));
+  }
+
+  /**
+   * Calculate remaining time in minutes for a task
+   */
+  getRemainingMinutes(task: Task): number {
+    if (!task.duration || !task.startedAt || task.status !== TaskStatus.IN_PROGRESS) {
+      return 0;
+    }
+    const elapsed = this.getElapsedMinutes(task);
+    return Math.max(0, task.duration - elapsed);
+  }
+
+  /**
+   * Get time progress percentage
+   */
+  getTimeProgress(task: Task): number {
+    if (!task.duration || !task.startedAt || task.status !== TaskStatus.IN_PROGRESS) {
+      return 0;
+    }
+    const elapsed = this.getElapsedMinutes(task);
+    return Math.min(100, Math.floor((elapsed / task.duration) * 100));
+  }
+
+  /**
+   * Check if task is in progress and has time tracking
+   */
+  isTaskTimerRunning(task: Task): boolean {
+    return task.status === TaskStatus.IN_PROGRESS && 
+           !!task.duration && 
+           !!task.startedAt;
   }
 }

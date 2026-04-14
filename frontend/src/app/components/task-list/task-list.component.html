@@ -80,6 +80,9 @@
               Due: {{ task.dueDate | date:'short' }}
               <span *ngIf="isOverdue(task)" class="overdue-label"> (Overdue!)</span>
             </small>
+            <small *ngIf="task.duration" class="duration">
+              ⏱️ {{ formatDuration(task.duration) }}
+            </small>
           </div>
           <div class="task-actions">
             <button 

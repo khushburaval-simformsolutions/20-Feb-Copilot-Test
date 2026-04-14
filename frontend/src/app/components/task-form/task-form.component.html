@@ -106,6 +106,32 @@
       </div>
     </div>
 
+    <!-- Duration Field -->
+    <div class="form-group">
+      <label for="duration">Estimated Duration (minutes)</label>
+      <input 
+        id="duration"
+        type="number" 
+        formControlName="duration" 
+        class="form-control"
+        [class.invalid]="duration?.invalid && duration?.touched"
+        placeholder="e.g., 30, 60, 120"
+        min="1"
+        max="9999">
+      
+      <div class="error-messages" *ngIf="duration?.invalid && duration?.touched">
+        <small class="error" *ngIf="duration?.errors?.['min']">
+          Duration must be at least 1 minute
+        </small>
+        <small class="error" *ngIf="duration?.errors?.['max']">
+          Duration cannot exceed 9999 minutes
+        </small>
+      </div>
+      <small class="helper-text" *ngIf="duration && duration.value && duration.value > 0">
+        Approximately {{ formatDuration(duration.value) }}
+      </small>
+    </div>
+
     <!-- High Priority Validation Error -->
     <div class="form-group" *ngIf="hasHighPriorityError && (priority?.touched || dueDate?.touched)">
       <div class="error-messages">

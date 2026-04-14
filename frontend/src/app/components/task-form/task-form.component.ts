@@ -80,6 +80,10 @@ export class TaskFormComponent implements OnInit {
       dueDate: [
         this.task?.dueDate ? this.task.dueDate.split('T')[0] : '',
         [Validators.required]
+      ],
+      duration: [
+        this.task?.duration || null,
+        [Validators.min(1), Validators.max(9999)]
       ]
     }, { validators: highPriorityDueDateValidator });
 
@@ -125,10 +129,27 @@ export class TaskFormComponent implements OnInit {
   get status() { return this.taskForm.get('status'); }
   get priority() { return this.taskForm.get('priority'); }
   get dueDate() { return this.taskForm.get('dueDate'); }
+  get duration() { return this.taskForm.get('duration'); }
   
   // Getter for form-level errors
   get hasHighPriorityError() {
     return this.taskForm.errors?.['highPriorityNoDueDate'] || 
            this.taskForm.errors?.['highPriorityDueDateTooFar'];
   }
-}
+
+  // Format duration in minutes to a human-readable string
+  formatDuration(minutes: number): string {
+    if (!minutes || minutes < 1) return '';
+    
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours === 0) {
+      return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    } else if (mins === 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
+  }
+

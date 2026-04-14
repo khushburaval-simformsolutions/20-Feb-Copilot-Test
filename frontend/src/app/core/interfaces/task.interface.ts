@@ -8,6 +8,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string; // ISO date string
+  duration?: number; // Duration in minutes to complete the task
   createdAt: string;
   updatedAt?: string;
 }
@@ -18,6 +19,7 @@ export interface CreateTaskDto {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string;
+  duration?: number; // Duration in minutes to complete the task
 }
 
 export interface UpdateTaskDto extends Partial<CreateTaskDto> {

@@ -167,4 +167,20 @@ export class TaskListComponent implements OnInit, OnDestroy {
         return '';
     }
   }
+
+  // Format duration in minutes to a human-readable string
+  formatDuration(minutes: number): string {
+    if (!minutes || minutes < 1) return '';
+    
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours === 0) {
+      return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    } else if (mins === 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
+  }
 }

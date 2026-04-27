@@ -49,9 +49,10 @@ export class TaskFormComponent implements OnInit {
   minDate: string;
 
   constructor(private fb: FormBuilder) {
-    // Set minimum date to today
-    const today = new Date();
-    this.minDate = today.toISOString().split('T')[0];
+    // Set minimum date to tomorrow so only future dates are selectable
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.minDate = tomorrow.toISOString().split('T')[0];
   }
 
   ngOnInit(): void {
@@ -152,4 +153,4 @@ export class TaskFormComponent implements OnInit {
       return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''}`;
     }
   }
-
+}

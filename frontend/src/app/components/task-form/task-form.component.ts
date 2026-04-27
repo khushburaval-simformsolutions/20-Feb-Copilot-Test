@@ -49,10 +49,14 @@ export class TaskFormComponent implements OnInit {
   minDate: string;
 
   constructor(private fb: FormBuilder) {
-    // Set minimum date to tomorrow so only future dates are selectable
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    this.minDate = tomorrow.toISOString().split('T')[0];
+    // If current time is before 1 PM, allow today as due date (enough hours to work).
+    // If current time is 1 PM or later, only allow tomorrow and future dates.
+    const now = new Date();
+    const minDate = new Date(now);
+    if (now.getHours() >= 13) {
+      minDate.setDate(minDate.getDate() + 1);
+    }
+    this.minDate = minDate.toISOString().split('T')[0];
   }
 
   ngOnInit(): void {

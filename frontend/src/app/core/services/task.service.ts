@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, forkJoin, of, fromEvent, merge } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, forkJoin, of, fromEvent, merge, interval } from 'rxjs';
 import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { Task, CreateTaskDto, UpdateTaskDto } from '../interfaces/task.interface';
 import { StorageService, PendingOperation } from './storage.service';
@@ -33,6 +33,7 @@ export class TaskService {
   ) {
     this.initializeOnlineOfflineDetection();
     this.updatePendingChangesCount();
+    this.startAutoCompletionTimer();
   }
 
   /**
@@ -54,6 +55,46 @@ export class TaskService {
           next: () => console.log('Sync completed successfully'),
           error: (err) => console.error('Sync failed:', err)
         });
+      }
+    });
+  }
+
+  /**
+   * Start auto-completion timer that checks tasks every 10 seconds
+   */
+  private startAutoCompletionTimer(): void {
+    interval(10000).subscribe(() => {
+      this.checkAndAutoCompleteTasks();
+    });
+  }
+
+  /**
+   * Check all IN_PROGRESS tasks and auto-complete those that have exceeded their duration
+   */
+  private checkAndAutoCompleteTasks(): void {
+    const tasks = this.tasksSubject.value;
+    const now = new Date().getTime();
+
+    tasks.forEach(task => {
+      // Only process tasks that are IN_PROGRESS, have a duration, and have a startedAt timestamp
+      if (task.status === TaskStatus.IN_PROGRESS && 
+          task.duration && 
+          task.startedAt) {
+        
+        const startedAtTime = new Date(task.startedAt).getTime();
+        const elapsedMinutes = (now - startedAtTime) / (1000 * 60); // Convert ms to minutes
+
+        // If elapsed time >= duration, auto-complete the task
+        if (elapsedMinutes >= task.duration) {
+          console.log(`Auto-completing task: ${task.title}`);
+          this.updateTask({
+            id: task.id,
+            status: TaskStatus.DONE
+          }).subscribe({
+            next: () => console.log(`Task "${task.title}" auto-completed`),
+            error: (err) => console.error(`Failed to auto-complete task "${task.title}":`, err)
+          });
+        }
       }
     });
   }
@@ -158,9 +199,19 @@ export class TaskService {
   updateTask(task: UpdateTaskDto): Observable<Task> {
     this.loadingSubject.next(true);
     
+    // Automatically set startedAt when status changes to IN_PROGRESS
+    const taskToUpdate = { ...task };
+    if (task.status === TaskStatus.IN_PROGRESS && !task.startedAt) {
+      taskToUpdate.startedAt = new Date().toISOString();
+    }
+    // Clear startedAt when task is no longer IN_PROGRESS
+    if (task.status && task.status !== TaskStatus.IN_PROGRESS) {
+      taskToUpdate.startedAt = undefined;
+    }
+    
     if (this.isOnlineSubject.value) {
       // Online: API call + update localStorage
-      return this.http.patch<Task>(`${this.apiUrl}/${task.id}`, task).pipe(
+      return this.http.patch<Task>(`${this.apiUrl}/${taskToUpdate.id}`, taskToUpdate).pipe(
         tap(updatedTask => {
           const currentTasks = this.tasksSubject.value;
           const index = currentTasks.findIndex(t => t.id === updatedTask.id);
@@ -176,18 +227,18 @@ export class TaskService {
     } else {
       // Offline: update localStorage + queue operation
       const currentTasks = this.tasksSubject.value;
-      const index = currentTasks.findIndex(t => t.id === task.id);
+      const index = currentTasks.findIndex(t => t.id === taskToUpdate.id);
       
       if (index !== -1) {
-        const updatedTask = { ...currentTasks[index], ...task };
+        const updatedTask = { ...currentTasks[index], ...taskToUpdate };
         currentTasks[index] = updatedTask;
         this.tasksSubject.next([...currentTasks]);
         this.storageService.saveTask(updatedTask);
         
         this.storageService.queueOperation({
-          id: task.id,
+          id: taskToUpdate.id,
           type: 'update',
-          taskData: task,
+          taskData: taskToUpdate,
           timestamp: Date.now()
         });
         this.updatePendingChangesCount();
